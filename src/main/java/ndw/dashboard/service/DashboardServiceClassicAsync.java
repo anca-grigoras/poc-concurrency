@@ -10,7 +10,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Service
-public class DashboardServiceClassicAsync {
+public class DashboardServiceClassicAsync implements DashboardService {
 
     private final SlowUserClient client;
     private final ExecutorService executor =
@@ -20,6 +20,7 @@ public class DashboardServiceClassicAsync {
         this.client = client;
     }
 
+    @Override
     public DashboardDto getDashboard(String userId) throws Exception {
         CompletableFuture<UserProfile> profileFuture =
                 CompletableFuture.supplyAsync(
@@ -36,5 +37,10 @@ public class DashboardServiceClassicAsync {
         return profileFuture
                 .thenCombine(statsFuture, DashboardDto::new)
                 .get(); // block and unwrap, with checked Exception
+    }
+
+    @Override
+    public String getImplementationType() {
+        return "CompletableFuture (Fixed Thread Pool)";
     }
 }

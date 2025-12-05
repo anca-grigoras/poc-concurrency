@@ -6,7 +6,7 @@ import ndw.dashboard.model.UserStats;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DashboardServiceClassicSequential {
+public class DashboardServiceClassicSequential implements DashboardService {
 
     private final SlowUserClient client;
 
@@ -14,10 +14,16 @@ public class DashboardServiceClassicSequential {
         this.client = client;
     }
 
+    @Override
     public DashboardDto getDashboard(String userId) {
         UserProfile profile = client.fetchProfile(userId); // ~500 ms
         UserStats stats = client.fetchStats(userId);       // ~700 ms
         // total ~1.2 s
         return new DashboardDto(profile, stats);
+    }
+
+    @Override
+    public String getImplementationType() {
+        return "Sequential (Blocking)";
     }
 }
