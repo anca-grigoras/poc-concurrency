@@ -24,8 +24,9 @@ public class SlowUserClient {
 
     private void logWithCorrelation(String operation) {
         String corr = RequestContext.CORRELATION_ID.orElse("no-corr-id");
-        // [corr-id] operation
-        log.info("[{}] {}", corr, operation);
+        String threadName = Thread.currentThread().getName();
+        // [corr-id] [thread] operation
+        log.info("[corr-id: {}] [thread: {}] {}", corr, threadName, operation);
     }
 
 
