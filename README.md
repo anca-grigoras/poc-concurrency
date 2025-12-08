@@ -186,16 +186,16 @@ public DashboardDto getDashboard(String userId) throws Exception {
 ### Structured Concurrency (Java 25 - Fifth Preview)
 ```java
 public DashboardDto getDashboard(String userId) throws Exception {
-    try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+    try (var scope = StructuredTaskScope.open()) {
         var profileTask = scope.fork(() -> client.fetchProfile(userId));
         var statsTask = scope.fork(() -> client.fetchStats(userId));
 
         scope.join();           // Wait for all
-        scope.throwIfFailed();  // Propagate errors
 
         return new DashboardDto(profileTask.get(), statsTask.get());
         // Total: ~700ms (parallel execution)
         // ✅ ScopedValue propagates automatically (Scoped Values FINALIZED in Java 25!)
+        // Note: Java 25 uses StructuredTaskScope.open() - cleaner API!
     }
 }
 ```
@@ -233,6 +233,12 @@ Try modifying `SlowUserClient.java` to:
 - ✅ **Scoped Values are now finalized** - No longer preview, production ready!
 - ⚠️ Structured Concurrency is in **fifth preview** - API is stable, expected to finalize in Java 26
 - The `--enable-preview` flag is only needed for Structured Concurrency now
+
+**API Changes in Java 25:**
+- **New API**: `StructuredTaskScope.open()` replaces `new StructuredTaskScope.ShutdownOnFailure()`
+- Simpler, cleaner syntax
+- Error handling happens automatically when calling `get()` on subtasks
+- No more explicit `throwIfFailed()` call needed
 
 **Why Fifth Preview?**
 - Fifth preview means the API is essentially frozen
