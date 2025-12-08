@@ -1,9 +1,13 @@
 # POC: Structured Concurrency vs CompletableFuture
 
-A Spring Boot demo comparing three concurrency approaches in Java 23:
+A Spring Boot demo comparing three concurrency approaches in Java 25:
 1. **Sequential (Blocking)** - Traditional blocking I/O (~1200ms)
 2. **CompletableFuture (Async)** - Classic async with thread pools (~700ms)
-3. **Structured Concurrency** - Java 23's new paradigm (~700ms, cleaner code)
+3. **Structured Concurrency** - Java 25's new paradigm (~700ms, cleaner code)
+
+> **Java 25 Status:**
+> - ✅ **Scoped Values are FINALIZED** - Production ready!
+> - ⚠️ **Structured Concurrency is Fifth Preview** - API stable, finalization in Java 26
 
 ## Key Differences
 
@@ -22,8 +26,9 @@ The **correlation ID problem** demonstrates a key advantage:
 
 ## Prerequisites
 
-- Java 23+
+- **Java 25** (or Java 21+ with preview features)
 - Maven 3.6+
+- Note: Scoped Values are finalized in Java 25, Structured Concurrency requires `--enable-preview`
 
 ## Quick Start
 
@@ -45,7 +50,7 @@ curl http://localhost:8080/dashboard/info
 Response:
 ```json
 {
-  "currentImplementation": "Structured Concurrency (Java 23)",
+  "currentImplementation": "Structured Concurrency (Java 25)",
   "hint": "Change via application.properties: dashboard.service.implementation=[sequential|async|structured]"
 }
 ```
@@ -96,7 +101,7 @@ Example output:
     "maxMs": "708.44",
     "sampleResult": { ... }
   },
-  "Structured Concurrency (Java 23)": {
+  "Structured Concurrency (Java 25)": {
     "iterations": 10,
     "averageMs": "701.88",
     "minMs": "700.23",
@@ -178,19 +183,19 @@ public DashboardDto getDashboard(String userId) throws Exception {
 }
 ```
 
-### Structured Concurrency (Java 23)
+### Structured Concurrency (Java 25 - Fifth Preview)
 ```java
 public DashboardDto getDashboard(String userId) throws Exception {
-    try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+    try (var scope = StructuredTaskScope.open()) {
         var profileTask = scope.fork(() -> client.fetchProfile(userId));
         var statsTask = scope.fork(() -> client.fetchStats(userId));
 
         scope.join();           // Wait for all
-        scope.throwIfFailed();  // Propagate errors
 
         return new DashboardDto(profileTask.get(), statsTask.get());
         // Total: ~700ms (parallel execution)
-        // ✅ ScopedValue propagates automatically!
+        // ✅ ScopedValue propagates automatically (Scoped Values FINALIZED in Java 25!)
+        // Note: Java 25 uses StructuredTaskScope.open() - cleaner API!
     }
 }
 ```
@@ -218,5 +223,25 @@ Try modifying `SlowUserClient.java` to:
 
 ## References
 
-- [JEP 462: Structured Concurrency](https://openjdk.org/jeps/462)
-- [JEP 464: Scoped Values](https://openjdk.org/jeps/464)
+- [JEP 444: Virtual Threads](https://openjdk.org/jeps/444) - Stable since Java 21
+- [JEP 481: Scoped Values](https://openjdk.org/jeps/481) - **FINALIZED in Java 25**
+- [JEP 480: Structured Concurrency (Fifth Preview)](https://openjdk.org/jeps/480) - Fifth Preview in Java 25
+
+## Java 25 Features
+
+**What's New:**
+- ✅ **Scoped Values are now finalized** - No longer preview, production ready!
+- ⚠️ Structured Concurrency is in **fifth preview** - API is stable, expected to finalize in Java 26
+- The `--enable-preview` flag is only needed for Structured Concurrency now
+
+**API Changes in Java 25:**
+- **New API**: `StructuredTaskScope.open()` replaces `new StructuredTaskScope.ShutdownOnFailure()`
+- Simpler, cleaner syntax
+- Error handling happens automatically when calling `get()` on subtasks
+- No more explicit `throwIfFailed()` call needed
+
+**Why Fifth Preview?**
+- Fifth preview means the API is essentially frozen
+- Only final performance/quality tuning remains
+- Very safe to use in new projects
+- Finalization expected in Java 26 (March 2026)
