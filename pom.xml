@@ -12,21 +12,24 @@
     <description>POC: Structured Concurrency vs CompletableFuture</description>
 
     <properties>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>21</maven.compiler.release>
+        <maven.compiler.release>25</maven.compiler.release>
     </properties>
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
                 <configuration>
-                    <source>21</source>
-                    <target>21</target>
-                    <!-- Preview features needed for Structured Concurrency and Scoped Values -->
-                    <!-- Both are preview in Java 21 -->
-                    <compilerArgs>--enable-preview</compilerArgs>
+                    <source>25</source>
+                    <target>25</target>
+                    <!-- Preview features needed for Structured Concurrency (Fifth Preview) -->
+                    <!-- Scoped Values are FINALIZED in Java 25, no flag needed for them! -->
+                    <compilerArgs>
+                        <arg>--enable-preview</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>

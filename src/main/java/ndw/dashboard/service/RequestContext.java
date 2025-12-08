@@ -6,7 +6,7 @@ import java.lang.ScopedValue;
 /**
  * Request context using ScopedValue for correlation IDs.
  *
- * ScopedValue is in PREVIEW in Java 21 (requires --enable-preview)
+ * ScopedValue is FINALIZED in Java 25 (JEP 481) - production ready!
  * It provides immutable, thread-safe context propagation that automatically
  * inherits to child tasks in Structured Concurrency.
  *
