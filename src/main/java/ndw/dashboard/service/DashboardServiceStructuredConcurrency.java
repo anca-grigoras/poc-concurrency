@@ -20,6 +20,8 @@ public class DashboardServiceStructuredConcurrency implements DashboardService {
     public DashboardDto getDashboard(String userId) throws Exception {
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
             // Fork tasks - they inherit ScopedValue automatically!
+            // Note: ScopedValue is FINALIZED in Java 25 (production ready!)
+            // Structured Concurrency is Fifth Preview (API stable)
             var profileTask = scope.fork(() -> client.fetchProfile(userId));
             var statsTask = scope.fork(() -> client.fetchStats(userId));
 
@@ -34,6 +36,6 @@ public class DashboardServiceStructuredConcurrency implements DashboardService {
 
     @Override
     public String getImplementationType() {
-        return "Structured Concurrency (Java 23)";
+        return "Structured Concurrency (Java 25 - Fifth Preview)";
     }
 }

@@ -2,6 +2,11 @@
 
 This demonstrates the **key difference** between CompletableFuture and Structured Concurrency when it comes to context propagation using Java's `ScopedValue`.
 
+> **Java 25 Note:**
+> - ✅ **Scoped Values are FINALIZED** in Java 25 - Production ready!
+> - ⚠️ Structured Concurrency is in **Fifth Preview** - API stable, `--enable-preview` still required
+> - This demo shows the power of finalized Scoped Values + preview Structured Concurrency working together
+
 ## The Problem
 
 When using `CompletableFuture.supplyAsync()` with a thread pool:
